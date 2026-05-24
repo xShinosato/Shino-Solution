@@ -106,14 +106,60 @@ if ($running) {
 }
 
 # ------------------------------------------------------------
-#  Download
+#  Download with rich diagnostics
+# ------------------------------------------------------------
+#  The cryptic "The request was aborted: The connection was
+#  closed unexpectedly" almost always means GitHub returned a
+#  404 (no Release / no asset) and PowerShell 5's Invoke-
+#  WebRequest dropped the response. We pre-flight a HEAD probe
+#  so the user gets a SPECIFIC error message instead.
 # ------------------------------------------------------------
 Info ("Downloading {0} ..." -f $ExeName)
+
+function Test-ReleaseAsset ($Url) {
+    try {
+        $req = [System.Net.HttpWebRequest]::Create($Url)
+        $req.Method            = 'HEAD'
+        $req.AllowAutoRedirect = $true
+        $req.UserAgent         = 'Shino-Solution-Installer'
+        $req.Timeout           = 15000
+        $resp = $req.GetResponse()
+        $size = $resp.ContentLength
+        $resp.Close()
+        return @{ Ok = $true; SizeMb = [math]::Round($size / 1MB, 1) }
+    } catch [System.Net.WebException] {
+        $http = $_.Exception.Response
+        if ($http) {
+            return @{ Ok = $false; Code = [int]$http.StatusCode; Reason = $http.StatusDescription }
+        }
+        return @{ Ok = $false; Code = 0; Reason = $_.Exception.Message }
+    }
+}
+
+$probe = Test-ReleaseAsset $DownloadUrl
+if (-not $probe.Ok) {
+    Err ("Pre-flight HEAD on {0} returned {1} {2}." -f $DownloadUrl, $probe.Code, $probe.Reason)
+    switch ($probe.Code) {
+        404 {
+            Err  "The Release or its Shino-Solution.exe asset doesn't exist yet."
+            Info "Fix : publish a Release on"
+            Info "      https://github.com/xShinosato/Shino-Solution/releases/new"
+            Info "      with the tag v1.0.0 and Shino-Solution.exe attached."
+        }
+        403 { Err "GitHub returned 403 (rate-limit or auth). Try again in a few minutes." }
+        0   { Err "Could not reach GitHub. Check your network / proxy / antivirus." }
+        default { Err ("Unexpected HTTP {0}. See the URL in a browser to confirm." -f $probe.Code) }
+    }
+    return
+}
+
+Info ("Asset reachable : {0} MB." -f $probe.SizeMb)
+
 try {
     # Invoke-WebRequest is slow on big files due to its default
     # progress bar -- disable it for a ~10x speed-up.
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -Uri $DownloadUrl -OutFile $ExePath -UseBasicParsing
+    Invoke-WebRequest -Uri $DownloadUrl -OutFile $ExePath -UseBasicParsing -UserAgent 'Shino-Solution-Installer'
     $ProgressPreference = 'Continue'
 } catch {
     Err ("Download failed : {0}" -f $_.Exception.Message)
