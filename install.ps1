@@ -171,9 +171,18 @@ $sizeMb = [math]::Round((Get-Item $ExePath).Length / 1MB, 1)
 Ok ("Downloaded {0} ({1} MB)." -f $ExeName, $sizeMb)
 
 # ------------------------------------------------------------
-#  Default settings.json -- written ONLY if missing
+#  Default settings.json -- written ONLY if missing.
+#  Power-users can opt-in to a forced reset by setting
+#  $env:SHINO_RESET_CONFIG = '1' before running the one-liner.
 # ------------------------------------------------------------
 $SettingsPath = Join-Path $InstallDir ("{0}.settings.json" -f $AppName)
+$ForceReset   = $env:SHINO_RESET_CONFIG -eq '1'
+if ($ForceReset -and (Test-Path $SettingsPath)) {
+    $backup = "$SettingsPath.bak"
+    Copy-Item $SettingsPath $backup -Force
+    Remove-Item $SettingsPath -Force
+    Warn ("SHINO_RESET_CONFIG=1 -- backed up old config to {0}" -f $backup)
+}
 if (-not (Test-Path $SettingsPath)) {
     # Aggressive defaults : 300 MB hard cap per Roblox instance,
     # 5 FPS, efficiency_mode on. Users can edit this file later
