@@ -1,0 +1,13 @@
+# Local artifacts -- never commit binaries, they belong in
+# GitHub Releases (see README.md for the install one-liner).
+*.exe
+*.pdb
+*.dll
+*.zip
+
+# OS / editor noise
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
+*.swp
