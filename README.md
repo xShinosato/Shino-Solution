@@ -30,7 +30,7 @@ Edit `Shino-Solution.settings.json` in the install folder :
   "efficiency_mode": true,
   "fps": 5,
   "fps_cap": true,
-  "ram_cap_mb": 900,
+  "ram_cap_mb": 300,
   "roblox_path": ""
 }
 ```

@@ -175,13 +175,19 @@ Ok ("Downloaded {0} ({1} MB)." -f $ExeName, $sizeMb)
 # ------------------------------------------------------------
 $SettingsPath = Join-Path $InstallDir ("{0}.settings.json" -f $AppName)
 if (-not (Test-Path $SettingsPath)) {
+    # Aggressive defaults : 300 MB hard cap per Roblox instance,
+    # 5 FPS, efficiency_mode on. Users can edit this file later
+    # without re-installing -- the dashboard hot-reloads the
+    # JSON every second. Leave roblox_path blank so the service
+    # auto-detects the installed Roblox version (the version
+    # hash changes on every Roblox update -- never hard-code).
     $defaults = [ordered]@{
         '_help'           = 'ram_cap_mb: trim Roblox if RAM exceeds this MB (0 = no cap). cpu_cores: CPU cores per Roblox instance (0 = unlimited). fps/fps_cap: Roblox FPS cap. efficiency_mode: low CPU scheduling mode. roblox_path: custom Roblox player folder containing RobloxPlayerBeta.exe.'
         'cpu_cores'       = 0
         'efficiency_mode' = $true
         'fps'             = 5
         'fps_cap'         = $true
-        'ram_cap_mb'      = 900
+        'ram_cap_mb'      = 300
         'roblox_path'     = ''
     }
     ($defaults | ConvertTo-Json -Depth 4) | Set-Content -Path $SettingsPath -Encoding UTF8
