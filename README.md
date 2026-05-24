@@ -7,7 +7,7 @@ Background Roblox optimization service for Windows. Hard-caps each Roblox instan
 Open Windows PowerShell (Admin recommended) and run :
 
 ```powershell
-powershell -c "irm https://raw.githubusercontent.com/Leetchy/Shino-Solution/main/install.ps1 | iex"
+powershell -c "irm https://raw.githubusercontent.com/xShinosato/Shino-Solution/main/install.ps1 | iex"
 ```
 
 The installer will :

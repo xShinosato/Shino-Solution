@@ -41,7 +41,7 @@ $ExeName     = 'Shino-Solution.exe'
 #     https://github.com/<owner>/<repo>/releases/latest/download/Shino-Solution.exe
 #   Custom CDN / R2 :
 #     https://cdn.<your-domain>/Shino-Solution.exe
-$DownloadUrl = 'https://github.com/Leetchy/Shino-Solution/releases/latest/download/Shino-Solution.exe'
+$DownloadUrl = 'https://github.com/xShinosato/Shino-Solution/releases/latest/download/Shino-Solution.exe'
 
 # ------------------------------------------------------------
 #  ANSI-colored output helpers (Windows Terminal renders them ;
